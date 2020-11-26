@@ -203,7 +203,8 @@ def preprocessingDataset(dataset, is_dataset=True, instructionToCheck=["movement
                 
             attributes_list.append(' '.join(instruction))
             """
-            #instruction.append(len(nx_graph.nodes()))
+            instruction.append(len(nx_graph.nodes()))
+            instruction.append(len(nx_graph.edges()))
             instruction.append(complexity)
             #instruction.append(reg_used_count)
             attributes_list.append(instruction)
@@ -274,7 +275,8 @@ def preprocessingDataset(dataset, is_dataset=True, instructionToCheck=["movement
         instruction.append(len(asm_list))
         """
         
-        #instruction.append(len(nx_graph.nodes()))
+        instruction.append(len(nx_graph.nodes()))
+        instruction.append(len(nx_graph.edges()))
         instruction.append(complexity)
         #instruction.append(reg_used_count)
         attributes_list.append(instruction)
@@ -373,7 +375,7 @@ if __name__ == "__main__":
     y_all = y_all[0]["target"]
     #print(len(preprocessed), len(y_all))
     
-    predictAll(preprocessed, y_all, "count", "regression", test_size=0.33, random_state=15, is_string=False, blind_test_also=True)
+    predictAll(preprocessed, y_all, "count", "trees", test_size=0.33, random_state=15, is_string=False, blind_test_also=True)
     
     """
     vectorizer = doVectorizer("count")
