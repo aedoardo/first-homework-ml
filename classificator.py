@@ -151,6 +151,7 @@ def preprocessingDataset(dataset, is_dataset=True, instructionToCheck=["movement
             css = nx.components.number_strongly_connected_components(nx_graph)
             #print(css)
             complexity = len(nx_graph.edges()) - len(nx_graph.nodes()) - css
+            
             """
             for key in range(0, len(instructionToCheck)):
                 instruction.append(0)
@@ -174,8 +175,7 @@ def preprocessingDataset(dataset, is_dataset=True, instructionToCheck=["movement
                     count = instruction[i]
                     for j in range(0, len(instructionsx64[key])):
                         count += command.count(instructionsx64[key][j])
-                    instruction[i] = count
-                
+                    instruction[i] = count 
                         
             #X_all of all possible commands
             """
@@ -206,7 +206,7 @@ def preprocessingDataset(dataset, is_dataset=True, instructionToCheck=["movement
             instruction.append(len(nx_graph.nodes()))
             instruction.append(len(nx_graph.edges()))
             instruction.append(complexity)
-            #instruction.append(reg_used_count)
+            instruction.append(reg_used_count)
             attributes_list.append(instruction)
         if normalize2:
             attributes_list = normalize(attributes_list, norm='l2')
@@ -278,7 +278,7 @@ def preprocessingDataset(dataset, is_dataset=True, instructionToCheck=["movement
         instruction.append(len(nx_graph.nodes()))
         instruction.append(len(nx_graph.edges()))
         instruction.append(complexity)
-        #instruction.append(reg_used_count)
+        instruction.append(reg_used_count)
         attributes_list.append(instruction)
         if normalize2:
             attributes_list = normalize(attributes_list, norm='l2')
@@ -313,7 +313,7 @@ def doModel(modeltype, xtrain, ytrain):
         return 
     
 
-def predictAll(X_all, y_all, vect, model, test_size=0.2, random_state=15, is_string=False, blind_test_also=False):
+def predictAll(X_all, y_all, vect, model, test_size=0.2, random_state=15, is_string=False, blind_test_also=False, testfile="nodupblindtest.json"):
     
     modelstr = model
     if is_string:
@@ -341,8 +341,8 @@ def predictAll(X_all, y_all, vect, model, test_size=0.2, random_state=15, is_str
     
     if blind_test_also:
         filename = int(time.time())
-        f = open(modelstr + "_" + str(filename) + ".txt","w+")
-        with jsonlines.open("nodupblindtest.json") as reader:
+        f = open("results/" + modelstr + "_" + str(filename) + ".txt","w+")
+        with jsonlines.open(testfile) as reader:
             for line in reader:
                 if is_string:
                     xnew = vectorizer.transform(np.array([line["lista_asm"]]))
@@ -361,9 +361,9 @@ if __name__ == "__main__":
     
     
     #out = buildNewDataset("cleaned_nodupdataset.json", "builded_nodupdataset.json")
-    
-    ds = "cleaned_nodupdataset.json" if True else "cleaned_dataset.json"
-    ds2 = "builded_nodupdataset.json" if True else "builded_dataset.json"
+    c18 = True
+    ds = "cleaned_nodupdataset.json" if c18 else "cleaned_dataset.json"
+    ds2 = "builded_nodupdataset.json" if c18 else "builded_dataset.json"
     
     with open(ds, mode='r') as f:  
         dataset = json.load(f)
@@ -375,31 +375,6 @@ if __name__ == "__main__":
     y_all = y_all[0]["target"]
     #print(len(preprocessed), len(y_all))
     
-    predictAll(preprocessed, y_all, "count", "trees", test_size=0.33, random_state=15, is_string=False, blind_test_also=True)
-    
-    """
-    vectorizer = doVectorizer("count")
-    X_all = vectorizer.fit_transform(out[0]["data"])
-    y_all = out[0]["target"]
-    X_train, X_test, y_train, y_test = train_test_split(X_all, y_all, test_size=0.2, random_state=15)
-    
-    randid = random.randrange(0, X_train.shape[0])
-    print("{}".format(randid))
-    print("Train: {} - Test: {}".format(X_train.shape[0], X_test.shape[0]))
-    
-    model = doModel("bernoulli", X_train, y_train)
-    
-    y_predict = model.predict(X_test)
-    print(classification_report(y_test, y_predict))
-    
-    f = open("results_count_multinomial.txt","w+")
-    with jsonlines.open("blindtest.json") as reader:
-        for line in reader:
-            xnew = vectorizer.transform(np.array([line["lista_asm"]]))
-            newpr = model.predict(xnew)
-            f.write(line["id"] + " " + classes[newpr[0]] + "\n")
-    
-    f.close()
-    """
+    predictAll(preprocessed, y_all, "count", "regression", test_size=0.33, random_state=15, is_string=False, blind_test_also=True, testfile="blindtest.json")
             
     
