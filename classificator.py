@@ -140,6 +140,19 @@ def buildNewDataset(dataset, outputDB="builded_dataset.json"):
 
 
 def preprocessingDataset(dataset, is_dataset=True, instructionToCheck=["movement", "binary", "comparison", "call", "shift", "unary"], normalize2=False, is_scale=False):
+    """
+    Parameters
+    ----------
+    dataset : the dataset
+    is_dataset : if it is loading a dataset
+    instructionToCheck : list of categories to check
+        DESCRIPTION. The default is ["movement", "binary", "comparison", "call", "shift", "unary"].
+    normalize2 : if we want normalize
+    is_scale : if we want scale
+    Returns
+    -------
+    X_All attributes np array.
+    """
     attributes_list = []
     if is_dataset:
         for func in dataset:
@@ -176,22 +189,7 @@ def preprocessingDataset(dataset, is_dataset=True, instructionToCheck=["movement
                     for j in range(0, len(instructionsx64[key])):
                         count += command.count(instructionsx64[key][j])
                     instruction[i] = count 
-                        
-            #X_all of all possible commands
-            """
-            for key in instructionsx64.keys():
-                for i in instructionsx64[key]:
-                    instruction.append(0)
                     
-            
-            for command in asm_list:
-                command = command.replace("'", '')
-                #xor_count += command.count("xor")
-                #mov_count += command.count("mov")
-                for key in instructionsx64.keys():
-                    for i in range(0, len(instructionsx64[key])):
-                        instruction[i] += command.count(instructionsx64[key][i])
-            """
             
 
             # for vectorizer
@@ -246,34 +244,6 @@ def preprocessingDataset(dataset, is_dataset=True, instructionToCheck=["movement
                     count += command.count(instructionsx64[clss][cmd])
                 instruction[i] = count
         """
-        # count of each command category
-        """for command in asm_list:
-            for i, key in enumerate(instructionsx64.keys()):
-                count = instruction[i]
-                for j in range(0, len(instructionsx64[key])):
-                    count += command.count(instructionsx64[key][j])
-                instruction[i] = count            
-        """
-        
-        
-        
-        """
-        for key in instructionsx64.keys():
-            for i in instructionsx64[key]:
-                instruction.append(0)
-        
-                
-        
-        for command in asm_list:
-            command = command.replace("'", '')
-            
-            for key in instructionsx64.keys():
-                for i in range(0, len(instructionsx64[key])):
-                    instruction[i] += command.count(instructionsx64[key][i])
-        
-            
-        instruction.append(len(asm_list))
-        """
         
         instruction.append(len(nx_graph.nodes()))
         instruction.append(len(nx_graph.edges()))
@@ -309,11 +279,26 @@ def doModel(modeltype, xtrain, ytrain):
         return GaussianNB().fit(xtrain, ytrain)
     elif modeltype == "regression":
         return LogisticRegression().fit(xtrain, ytrain)
-    elif modeltype ==  "quantile":
-        return 
+    return 
     
 
 def predictAll(X_all, y_all, vect, model, test_size=0.2, random_state=15, is_string=False, blind_test_also=False, testfile="nodupblindtest.json"):
+    """
+    Parameters
+    ----------
+    X_all : np array attributes
+    y_all : np array target classes
+    vect : vectorizer type, if use vector ["hashing", "cont", "tfid"]
+    model : the model we'll use to train ["bernoulli", "multinomial", "trees", "svm", "gaussian", "regression"]
+    test_size : number optional size of the test, the default is 0.2.
+    random_state : integer, random seed
+    is_string : if we're using text or not
+    blind_test_also : run also the blindtest
+    testfile : string, The default is "nodupblindtest.json".
+    Returns
+    -------
+    None.
+    """
     
     modelstr = model
     if is_string:
@@ -355,11 +340,7 @@ def predictAll(X_all, y_all, vect, model, test_size=0.2, random_state=15, is_str
     return
     
 if __name__ == "__main__":
-    #print(parseDataset("dataset_target_data.json"))
-    
     #pdbnodup = parseDataset("noduplicatedataset.json", "cleaned_nodupdataset.json")
-    
-    
     #out = buildNewDataset("cleaned_nodupdataset.json", "builded_nodupdataset.json")
     c18 = True
     ds = "cleaned_nodupdataset.json" if c18 else "cleaned_dataset.json"
@@ -372,9 +353,7 @@ if __name__ == "__main__":
     with open(ds2, mode='r') as f:
         y_all = json.load(f)
         
-    y_all = y_all[0]["target"]
-    #print(len(preprocessed), len(y_all))
-    
+    y_all = y_all[0]["target"]    
     predictAll(preprocessed, y_all, "count", "regression", test_size=0.33, random_state=15, is_string=False, blind_test_also=True, testfile="blindtest.json")
             
     
